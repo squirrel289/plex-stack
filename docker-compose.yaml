@@ -1,0 +1,45 @@
+version: "2.3"
+services:
+  plex:
+    image: plexinc/pms-docker:latest
+    #    runtime: nvidia
+    container_name: plex
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+      - PLEX_ID=${PUID}
+      - PLEX_GID=${PGID}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /config/plexmediaserver:/config
+      - /mnt/data/Media:/data
+      - /mnt/c1/plexmediaserver:/transcode
+    network_mode: host
+    restart: unless-stopped
+
+  tautulli: 
+    image: tautulli/tautulli
+    container_name: tautulli
+    environment:
+    - PUID=${TUID}
+    - PGID=${TGID}
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /config/tautulli:/config
+    - /config/plexmediaserver/Library/Application Support/Plex Media Server/Logs/:/plex_logs:ro
+    network_mode: host
+    restart: unless-stopped
+
+  ombi:
+    image: linuxserver/ombi
+    container_name: ombi
+    environment:
+      - PUID=${OUID}
+      - PGID=${OGID}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /config/ombi/:/config
+    ports:
+      - 3579:3579
+    mem_limit: 4096m
+    restart: unless-stopped
